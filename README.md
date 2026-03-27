@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# WikiLayer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal Wikipedia reading companion with intelligent article recommendations and reading progress tracking.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Article Search & Reading** — Search Wikipedia and read articles with scroll-based progress tracking
+- **Smart Recommendations** — Discover related articles based on content analysis and reading patterns
+- **Reading History** — Resume interrupted articles, track reading time and completion percentage
+- **Featured Articles** — Curated daily featured article from Wikipedia
+- **Session Analytics** — View network graphs of your reading journey and session history
+- **Random Discovery** — Explore unexpected articles with a single click
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js 18+ (uses [Bun](https://bun.sh) for package management)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun run dev
 ```
+
+Opens at `http://localhost:5173` with hot module reloading.
+
+### Building
+
+```bash
+bun run build
+```
+
+Produces optimized production bundle in the `dist` directory.
+
+### Linting
+
+```bash
+bun run lint
+```
+
+## Tech Stack
+
+- **React 19** — UI framework
+- **TypeScript** — Type safety
+- **Vite** — Build tool with HMR
+- **React Router v7** — Client-side routing
+- **Jotai** — Lightweight state management
+- **Wikipedia API** — Article data and recommendations
+- **React Force Graph** — Network visualization of article relationships
+
+## Project Structure
+
+```
+src/
+  ├── pages/          # Route pages (Home, Article, History)
+  ├── components/     # React components (layout, reader, history, etc.)
+  ├── hooks/          # Custom React hooks (scroll tracking, recommendations)
+  ├── algorithms/     # Recommendation & scoring algorithms
+  ├── api/            # Wikipedia API integration
+  ├── atoms/          # Jotai state atoms
+  ├── types/          # TypeScript type definitions
+  ├── utils/          # Utility functions
+  └── App.tsx         # Root component
+```
+
+## How It Works
+
+1. **Search or Browse** — Find articles via search or random selection
+2. **Read** — Progress is tracked automatically as you scroll
+3. **Get Recommendations** — Algorithm suggests related articles based on content and your reading history
+4. **Track History** — Session data is saved locally, allowing you to resume and view your reading patterns
