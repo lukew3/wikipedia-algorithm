@@ -1,0 +1,120 @@
+/* Scoped styles for Wikipedia HTML injection */
+.wiki-content {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.wiki-content p {
+  margin-bottom: 1em;
+}
+
+.wiki-content h1,
+.wiki-content h2,
+.wiki-content h3,
+.wiki-content h4 {
+  margin: 1.5em 0 0.5em;
+  line-height: 1.3;
+}
+
+.wiki-content h1 { font-size: 1.8rem; }
+.wiki-content h2 { font-size: 1.4rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.25em; }
+.wiki-content h3 { font-size: 1.15rem; }
+
+.wiki-content ul,
+.wiki-content ol {
+  margin: 0.75em 0 0.75em 2em;
+}
+
+.wiki-content li {
+  margin-bottom: 0.25em;
+}
+
+.wiki-content table {
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.875rem;
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+.wiki-content td,
+.wiki-content th {
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.wiki-content th {
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.wiki-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.wiki-content figure {
+  margin: 1em 0;
+  float: right;
+  clear: right;
+  margin-left: 1.5em;
+  max-width: 300px;
+}
+
+@media (max-width: 600px) {
+  .wiki-content figure {
+    float: none;
+    max-width: 100%;
+    margin-left: 0;
+  }
+}
+
+.wiki-content figcaption {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25em;
+}
+
+.wiki-content .infobox {
+  float: right;
+  clear: right;
+  margin: 0 0 1em 1.5em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: 0.85rem;
+  max-width: 280px;
+}
+
+@media (max-width: 600px) {
+  .wiki-content .infobox {
+    float: none;
+    max-width: 100%;
+    margin-left: 0;
+  }
+}
+
+.wiki-content sup {
+  font-size: 0.7em;
+}
+
+.wiki-content .reference,
+.wiki-content .reflist,
+.wiki-content #References + ol,
+.wiki-content .mw-references-wrap {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* Hide wiki-specific elements that don't make sense in our reader */
+.wiki-content .mw-editsection,
+.wiki-content .noprint,
+.wiki-content .mw-jump-link,
+.wiki-content style,
+.wiki-content link {
+  display: none !important;
+}
