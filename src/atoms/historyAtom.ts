@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
-import type { ReadingHistory, HistoryGraph, HistoryGraphNode, HistoryGraphLink } from '@/types/history'
+import type { ReadingHistory, RabbitHoleTree, RabbitHoleNode } from '@/types/history'
 import type { ArticleSession } from '@/types/article'
 
 const EMPTY_HISTORY: ReadingHistory = {
@@ -12,57 +12,76 @@ const EMPTY_HISTORY: ReadingHistory = {
 
 export const readingHistoryAtom = atomWithStorage<ReadingHistory>('wikiapp:history', EMPTY_HISTORY)
 
-function buildHistoryGraph(history: ReadingHistory): HistoryGraph {
-  const nodeMap = new Map<number, HistoryGraphNode>()
-  const links: HistoryGraphLink[] = []
-
-  // Use pageId to deduplicate nodes across multiple visits to the same article
-  for (const session of Object.values(history.sessions)) {
-    const existing = nodeMap.get(session.pageId)
-    if (existing) {
-      existing.visitCount += 1
-      existing.totalTimeMs += session.totalTimeMs
-      if (session.finished) existing.finished = true
-    } else {
-      nodeMap.set(session.pageId, {
-        id: session.id,
-        title: session.title,
-        slug: session.slug,
-        thumbnail: session.thumbnail,
-        finished: session.finished,
-        visitCount: 1,
-        totalTimeMs: session.totalTimeMs,
-      })
-    }
+function buildNode(session: ArticleSession, childrenMap: Map<string, string[]>, sessions: Record<string, ArticleSession>): RabbitHoleNode {
+  const childIds = childrenMap.get(session.id) ?? []
+  return {
+    sessionId: session.id,
+    pageId: session.pageId,
+    title: session.title,
+    slug: session.slug,
+    thumbnail: session.thumbnail,
+    finished: session.finished,
+    totalTimeMs: session.totalTimeMs,
+    children: childIds
+      .map((id) => sessions[id])
+      .filter(Boolean)
+      .map((child) => buildNode(child, childrenMap, sessions)),
   }
-
-  // Build edges from parentId relationships
-  for (const session of Object.values(history.sessions)) {
-    if (session.parentId) {
-      const parentSession = history.sessions[session.parentId]
-      if (parentSession) {
-        const parentNode = nodeMap.get(parentSession.pageId)
-        const childNode = nodeMap.get(session.pageId)
-        if (parentNode && childNode && parentNode.id !== childNode.id) {
-          // Find which path this edge belongs to
-          const path = history.paths.find(
-            (p) => p.articleIds.includes(session.parentId!) && p.articleIds.includes(session.id)
-          )
-          links.push({
-            source: parentNode.id,
-            target: childNode.id,
-            pathId: path?.id ?? '',
-          })
-        }
-      }
-    }
-  }
-
-  return { nodes: Array.from(nodeMap.values()), links }
 }
 
-export const historyGraphAtom = atom<HistoryGraph>((get) => {
-  return buildHistoryGraph(get(readingHistoryAtom))
+function countNodes(node: RabbitHoleNode): number {
+  return 1 + node.children.reduce((sum, c) => sum + countNodes(c), 0)
+}
+
+function buildRabbitHoleTrees(history: ReadingHistory): RabbitHoleTree[] {
+  const trees: RabbitHoleTree[] = []
+
+  for (const path of history.paths) {
+    const pathSessionIds = new Set(path.articleIds)
+
+    // Build parent -> children map (only within this path)
+    const childrenMap = new Map<string, string[]>()
+    let rootSession: ArticleSession | undefined
+
+    for (const sessionId of path.articleIds) {
+      const session = history.sessions[sessionId]
+      if (!session) continue
+
+      if (!session.parentId || !pathSessionIds.has(session.parentId)) {
+        rootSession = session
+      } else {
+        const siblings = childrenMap.get(session.parentId) ?? []
+        siblings.push(session.id)
+        childrenMap.set(session.parentId, siblings)
+      }
+    }
+
+    if (!rootSession) continue
+
+    const root = buildNode(rootSession, childrenMap, history.sessions)
+
+    // Compute updatedAt: use path field if present, otherwise derive from sessions
+    const updatedAt = path.updatedAt ?? Math.max(
+      ...path.articleIds.map((id) => history.sessions[id]?.startedAt ?? 0),
+      path.startedAt,
+    )
+
+    trees.push({
+      pathId: path.id,
+      startedAt: path.startedAt,
+      updatedAt,
+      root,
+      nodeCount: countNodes(root),
+    })
+  }
+
+  // Sort by most recently updated first
+  trees.sort((a, b) => b.updatedAt - a.updatedAt)
+  return trees
+}
+
+export const rabbitHoleTreesAtom = atom<RabbitHoleTree[]>((get) => {
+  return buildRabbitHoleTrees(get(readingHistoryAtom))
 })
 
 export const unfinishedArticlesAtom = atom<ArticleSession[]>((get) => {

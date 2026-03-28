@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAtomValue, useAtom } from 'jotai'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight, faChevronLeft, faArrowTrendUp, faShuffle } from '@fortawesome/free-solid-svg-icons'
+import { activeSessionAtom } from '@/atoms/sessionAtom'
 import { nextPageRecommendationsAtom, discoveryRecommendationsAtom, recommendationsLoadingAtom } from '@/atoms/recommendationsAtom'
 import { recommendationPanelOpenAtom } from '@/atoms/uiAtom'
 import { Spinner } from '@/components/common/Spinner'
@@ -62,6 +63,7 @@ function RecommendationCard({ rec, onClick }: { rec: Recommendation; onClick: ()
 
 export function RecommendationPanel() {
   const navigate = useNavigate()
+  const activeSession = useAtomValue(activeSessionAtom)
   const [open, setOpen] = useAtom(recommendationPanelOpenAtom)
   const nextPage = useAtomValue(nextPageRecommendationsAtom)
   const discovery = useAtomValue(discoveryRecommendationsAtom)
@@ -126,7 +128,7 @@ export function RecommendationPanel() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {nextPage.slice(0, 3).map((rec) => (
-            <RecommendationCard key={rec.slug} rec={rec} onClick={() => navigate(`/wiki/${rec.slug}`)} />
+            <RecommendationCard key={rec.slug} rec={rec} onClick={() => navigate(`/wiki/${rec.slug}`, { state: { parentSessionId: activeSession?.id } })} />
           ))}
           {!loading.nextPage && nextPage.length === 0 && (
             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Loading suggestions…</p>
@@ -145,7 +147,7 @@ export function RecommendationPanel() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {discovery.slice(0, 3).map((rec) => (
-            <RecommendationCard key={rec.slug} rec={rec} onClick={() => navigate(`/wiki/${rec.slug}`)} />
+            <RecommendationCard key={rec.slug} rec={rec} onClick={() => navigate(`/wiki/${rec.slug}`, { state: { parentSessionId: activeSession?.id } })} />
           ))}
           {!loading.discovery && discovery.length === 0 && (
             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Read more articles to unlock discovery.</p>

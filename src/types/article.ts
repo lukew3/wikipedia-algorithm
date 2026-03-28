@@ -17,6 +17,7 @@ export interface ArticleSession {
 export interface ReadingPath {
   id: string
   startedAt: number
+  updatedAt: number
   endedAt?: number
   articleIds: string[]
 }

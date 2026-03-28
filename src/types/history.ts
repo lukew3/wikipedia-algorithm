@@ -7,25 +7,21 @@ export interface ReadingHistory {
   lastActiveAt: number
 }
 
-export interface HistoryGraphNode {
-  id: string
+export interface RabbitHoleNode {
+  sessionId: string
+  pageId: number
   title: string
   slug: string
   thumbnail?: string
   finished: boolean
-  visitCount: number
   totalTimeMs: number
-  x?: number
-  y?: number
+  children: RabbitHoleNode[]
 }
 
-export interface HistoryGraphLink {
-  source: string
-  target: string
+export interface RabbitHoleTree {
   pathId: string
-}
-
-export interface HistoryGraph {
-  nodes: HistoryGraphNode[]
-  links: HistoryGraphLink[]
+  startedAt: number
+  updatedAt: number
+  root: RabbitHoleNode
+  nodeCount: number
 }

@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '@/styles/article.css'
 
 interface Props {
   html: string
+  activeSessionId?: string
   onReady?: () => void
 }
 
@@ -15,9 +16,11 @@ function sanitize(html: string): string {
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
 }
 
-export function ArticleContent({ html, onReady }: Props) {
+export function ArticleContent({ html, activeSessionId, onReady }: Props) {
   const navigate = useNavigate()
   const contentRef = useRef<HTMLDivElement>(null)
+  const sessionIdRef = useRef(activeSessionId)
+  useLayoutEffect(() => { sessionIdRef.current = activeSessionId }, [activeSessionId])
 
   useEffect(() => {
     const el = contentRef.current
@@ -36,7 +39,7 @@ export function ArticleContent({ html, onReady }: Props) {
         if (!slug) continue
         const handler = (e: MouseEvent) => {
           e.preventDefault()
-          navigate(`/wiki/${slug}`)
+          navigate(`/wiki/${slug}`, { state: { parentSessionId: sessionIdRef.current } })
         }
         a.addEventListener('click', handler)
         cleanup.push(() => a.removeEventListener('click', handler))
@@ -47,7 +50,7 @@ export function ArticleContent({ html, onReady }: Props) {
           const slug = decodeURIComponent(match[1]).replace(/ /g, '_')
           const handler = (e: MouseEvent) => {
             e.preventDefault()
-            navigate(`/wiki/${slug}`)
+            navigate(`/wiki/${slug}`, { state: { parentSessionId: sessionIdRef.current } })
           }
           a.addEventListener('click', handler)
           cleanup.push(() => a.removeEventListener('click', handler))

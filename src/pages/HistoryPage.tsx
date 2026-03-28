@@ -1,17 +1,17 @@
 import { useAtomValue } from 'jotai'
-import { readingHistoryAtom } from '@/atoms/historyAtom'
-import { NetworkGraph } from '@/components/history/NetworkGraph'
+import { readingHistoryAtom, rabbitHoleTreesAtom } from '@/atoms/historyAtom'
+import { RabbitHoleTree } from '@/components/history/RabbitHoleTree'
 import { SessionList } from '@/components/history/SessionList'
-import { formatDuration } from '@/utils/time'
+import { formatDuration, formatRelativeDate } from '@/utils/time'
 
 function useIsMobile() {
-  // SSR-safe check
   if (typeof window === 'undefined') return false
   return window.innerWidth < 768
 }
 
 export function HistoryPage() {
   const history = useAtomValue(readingHistoryAtom)
+  const trees = useAtomValue(rabbitHoleTreesAtom)
   const isMobile = useIsMobile()
 
   const sessions = Object.values(history.sessions)
@@ -34,7 +34,7 @@ export function HistoryPage() {
         <Stat label="Articles read" value={String(totalArticles)} />
         <Stat label="Completed" value={String(finishedCount)} />
         <Stat label="Total time" value={formatDuration(totalTime)} />
-        <Stat label="Rabbit holes" value={String(history.paths.length)} />
+        <Stat label="Rabbit holes" value={String(trees.length)} />
       </div>
 
       {/* Main content */}
@@ -45,18 +45,31 @@ export function HistoryPage() {
 
         {isMobile ? (
           <SessionList />
+        ) : trees.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+            No reading history yet. Start exploring articles to build your rabbit holes.
+          </div>
         ) : (
-          <>
-            <div style={{ flex: 1, minHeight: 400 }}>
-              <NetworkGraph />
-            </div>
-            <details style={{ marginTop: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {trees.map((tree) => (
+              <div key={tree.pathId}>
+                <div className="rabbit-hole-header">
+                  <span style={{ fontWeight: 600 }}>{tree.root.title}</span>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
+                    {tree.nodeCount} {tree.nodeCount === 1 ? 'article' : 'articles'} &middot; {formatRelativeDate(tree.updatedAt)}
+                  </span>
+                </div>
+                <RabbitHoleTree tree={tree} />
+              </div>
+            ))}
+
+            <details style={{ marginTop: 8 }}>
               <summary style={{ cursor: 'pointer', color: 'var(--color-text-muted)', fontSize: '0.875rem', marginBottom: 8 }}>
                 All articles (list view)
               </summary>
               <SessionList />
             </details>
-          </>
+          </div>
         )}
       </div>
     </div>
