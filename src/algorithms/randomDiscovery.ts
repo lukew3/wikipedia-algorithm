@@ -49,9 +49,6 @@ export async function getDiscoveryRecommendations(fullHistory: string[]): Promis
     .map(([cat]) => cat)
 
   // Step 2: Weighted seed selection (recency bias)
-  const now = Date.now()
-  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000
-  // We don't have timestamps here, so use index as proxy: recent = end of array
   const recentCount = Math.min(Math.ceil(fullHistory.length * 0.4), fullHistory.length)
   const weights = fullHistory.map((_, i) => i >= fullHistory.length - recentCount ? 3 : 1)
   const totalWeight = weights.reduce((a, b) => a + b, 0)

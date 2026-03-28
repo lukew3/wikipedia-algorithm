@@ -3,12 +3,11 @@ import type { Recommendation, RecommendationContext } from '@/types/recommendati
 import { jaccard, rankScore, filterNoisyCategories } from './scoring'
 
 export async function getNextPageRecommendations(ctx: RecommendationContext): Promise<Recommendation[]> {
-  const { currentSlug, recentPath, fullHistory } = ctx
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  const { currentSlug, recentPath } = ctx
 
   const [moreLikeResults, currentLinks, categoriesMap] = await Promise.all([
     fetchMoreLike(currentSlug, 20).catch(() => []),
-    fetchLinks(currentSlug).catch(() => []),
+    fetchLinks(currentSlug).catch((): string[] => []),
     fetchCategories([currentSlug]).catch(() => ({} as Record<string, string[]>)),
   ])
 
